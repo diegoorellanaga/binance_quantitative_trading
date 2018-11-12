@@ -5,6 +5,20 @@ This docker repository is a modification of the respository belonging to [appcel
 
 ## Instructions
 
+To run Docker files and related extensions (docker-compose) you first need to install docker:
+
+### Docker installation:
+
+Follow the instructions found in this [link](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04).
+
+### Docker-compose installation:
+
+Follow the instructions found in this link [link](https://docs.docker.com/compose/install/#install-compose)
+
+### Run influxdb-grafana
+
+Once docker and docker-compose are installed do the following:
+
 To run grafana and influxdb run the following command:
 
  - cd to folder containing docker-compose.yml in my case ~/docker-grafana/
@@ -13,6 +27,6 @@ To run grafana and influxdb run the following command:
  - docker-compose up -d
 
 The last command should download and run the necessary images. Then you will have influxdb and grafana running on your pc.
-You should be able to access grafana by typing ***http://localhost:3000*** in your browser
+You should be able to access grafana by typing ***http://localhost:3000*** in your browser.
 
 
