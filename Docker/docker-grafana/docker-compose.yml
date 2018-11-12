@@ -1,0 +1,29 @@
+version: "2"
+services:
+  influxdb:
+    image: appcelerator/influxdb:latest
+    ports:
+      - "8086:8086"
+      - "8083:8083"
+    volumes:
+      - ./docker-compose.d/influxdb:/etc/extra-config/influxdb
+    environment:
+      FORCE_HOSTNAME: auto
+      PRE_CREATE_DB: "telegraf"
+
+  grafana:
+    image: appcelerator/grafana
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+     - "3000:3000"
+    volumes:
+      - ./docker-compose.d/grafana:/etc/extra-config/grafana
+    environment:
+      GRAFANA_PLUGIN_LIST: "grafana-piechart-panel"
+      FORCE_HOSTNAME: auto
+      INFLUXDB_HOST: influxdb
+      INFLUXDB_PASS: changeme
+      GRAFANA_USER: admin
+      GRAFANA_PASS: AxwayPassword*
