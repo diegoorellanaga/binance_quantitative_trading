@@ -29,4 +29,5 @@ To run grafana and influxdb run the following command:
 The last command should download and run the necessary images. Then you will have influxdb and grafana running on your pc.
 You should be able to access grafana by typing ***http://localhost:3000*** in your browser.
 
+For information about parameters settings and data storage location go to this [link](https://github.com/diegoorellanaga/binance_quantitative_trading/tree/master/Docker/docker-grafana).
 
