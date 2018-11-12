@@ -6,18 +6,19 @@ This file is in charge of the following section:
 
 ![title](../data/images/binance_to_influxdb_diagram.png)
 
-This file contains the class binanceInfluxdb.
+This file contains the class BinanceInfluxdb.
 
-### class binanceInfluxdb
+### class BinanceInfluxdb
 
-This class manages the connection between binance and influxdb
-To properly run this class you need to install the following:
+This class manages the connection between binance and influxdb.
+To properly use this class you need to install the following:
 
  - [binance-python](https://github.com/sammchardy/python-binance)
  - [influxdb-python](https://github.com/influxdata/influxdb-python)
 
+**BinanceInfluxdb class description**
 
-  Method                                  | Purpose                      
+  **Method**                                  | **Purpose**                      
   ----------------------------------------| --------------------------  
   online_process_message                  | This method is executed each time we receive a msg from the websocket connection.        
   get_previous_point                      | Fill the gap between the actual data being received and the last data stored on influxdb. The gap should be less than 2 days. If several days has passed update your data using the *insert_offline_data*.     
