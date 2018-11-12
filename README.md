@@ -1,4 +1,6 @@
-# Idea's diagram:
+
+### currently cleaning sorting and uploading what I have in my local computer.
+## Idea's diagram:
 ![title](data/images/general_diagram.png)
 
  - **a:** Binance exchanger.
