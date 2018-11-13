@@ -1,5 +1,5 @@
-
-### currently cleaning sorting and uploading what I have in my local computer.
+## Under construction
+### currently cleaning, sorting, fixing, and uploading what I have in my local computer.
 ## Idea's diagram:
 ![title](data/images/general_diagram.png)
 

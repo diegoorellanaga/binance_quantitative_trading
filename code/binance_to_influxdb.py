@@ -15,11 +15,7 @@ import copy
 from binance.websockets import BinanceSocketManager
 ######Binance############
 
-api_key = "api_key" #DELETE THIS!!!
-api_secret = "private_api_key" #DELETE THIS!!!
 
-
-#client = Client(api_key, api_secret)
 
 ############################
 ######InfluxDB##############
@@ -360,11 +356,18 @@ class binanceInfluxdb():
         
 symbol_1 = "IOTAUSDT"
 symbol_2=  "XRPUSDT"        
+
+f = open("/home/diego/Desktop/crypto/rl-crypto/Information/api_keys","r")
+keys = f.readlines()
+api_key = keys[0][:-1]
+api_secret = keys[1][:-1]
+
+
 ###        
-my_binance_influxdb_1 = binanceInfluxdb(symbol=symbol_1,is_new_db=False,database='binance')
+my_binance_influxdb_1 = binanceInfluxdb(symbol=symbol_1,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
 ##my_binance_influxdb_1.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
 ###           
-my_binance_influxdb_2 = binanceInfluxdb(symbol=symbol_2,is_new_db=False,database='binance')
+my_binance_influxdb_2 = binanceInfluxdb(symbol=symbol_2,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
 ##my_binance_influxdb_2.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
 #
 ##event_type,interval,units,num_of_units,msg_type
