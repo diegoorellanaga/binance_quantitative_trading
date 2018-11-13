@@ -22,6 +22,8 @@ def main():
     # we need to create the database
     if is_first_time:
         is_new_db = True
+    else:
+        is_new_db = False
     
     for i, symbol in enumerate(crypto_symbol_list):
         connection_list[i]=BinanceInfluxdb(symbol=symbol,is_new_db=is_new_db,database='binance',api_key=public_key,api_secret=private_key)
