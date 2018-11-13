@@ -9,6 +9,12 @@
  - **d:** We use Influxdb as our database because its purpose is to handle time series. 
  - **e:** The "Brain" of our setup will use tensorflow and python as the main tools.
  - **f:** Using the data stored in Influxdb we test several algorithms. 
- - **g:** If we found a good algorithm we can connect back to influxdb to buy and sell according to this algorithm.    
+ - **g:** If we found a good algorithm we can connect back to influxdb to buy and sell according to this algorithm.
+ - **h:** We can visualize influxdb data using grafana.
 
+### Grafana
+
+The following picture is what you should see once you establish the connection.
+
+![title](data/images/grafana_screenshot.png)
 
