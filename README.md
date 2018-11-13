@@ -12,9 +12,17 @@
  - **g:** If we found a good algorithm we can connect back to influxdb to buy and sell according to this algorithm.
  - **h:** We can visualize influxdb data using grafana.
 
+### TODO LIST
+
+- [x] Binance-influxdb connection
+- [ ] Calculate and update all Binance indicators
+- [ ] Upload files related to the machine learning tests on binance data
+- [ ] Upload files related to data extraction and formating from influxdb
+- [ ] Make a GUI
+
 ### Grafana
 
-The following picture is what you should see once you establish the connection.
+The following picture is what you may see once you establish the connection.
 
 ![title](data/images/grafana_screenshot.png)
 
