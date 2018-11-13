@@ -1,5 +1,3 @@
-# Here we find the code
-
 ### binance_to_influxdb.py
 
 This file is in charge of the following section:
