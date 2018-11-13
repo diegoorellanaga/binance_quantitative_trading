@@ -6,7 +6,7 @@ Created on Wed Oct 17 13:43:59 2018
 @author: root
 """
 
-
+import numpy as np
 from binance.client import Client
 import datetime
 from influxdb import InfluxDBClient
@@ -83,7 +83,7 @@ class binanceInfluxdb():
         self.insert_offline_tick_data(event_type,interval,units,num_of_units,msg_type)
     
     def insertMinuteTickValueIntoInfluxDB(self,msg,measurement,msg_type):
-        
+
         if msg_type == 'raw':
             json_body4 = [
             {
@@ -186,7 +186,7 @@ class binanceInfluxdb():
                     }
                 }
             ]            
-      
+
         self.InfluxClient.write_points(points=json_body4,retention_policy='coin_policy')
         print("inserting message with time: {0}, message type: {1}, measurement: {2}".format(json_body4[0]["time"],msg_type,measurement))
 
@@ -212,11 +212,13 @@ class binanceInfluxdb():
             raw_data=self.client.get_historical_klines(symbol, interval,from_date,to_date)
             #klines = client.get_historical_klines("ETHBTC", Client.KLINE_INTERVAL_30MINUTE, "1 Dec, 2017", "1 Jan, 2018")
    
-        list_of_msgs = []
+        list_of_msgs = list(np.zeros(len(raw_data),dtype=object))
         msg ={}
         msg["k"]={}
-        for raw_msg in raw_data:
+
+        for i, raw_msg in enumerate(raw_data):
             
+            '''            
             msg["e"]= event_type
             msg["s"]= symbol      
             msg["k"]["t"]=raw_msg[0]
@@ -231,15 +233,71 @@ class binanceInfluxdb():
             msg["k"]["q"]=raw_msg[7]     
             msg["k"]["V"]=raw_msg[9]     
             msg["k"]["Q"]=raw_msg[10] 
-            list_of_msgs.append(copy.deepcopy(msg))
-        
+           '''           
+            if i%1000 == 0:
+                print(i)
+           
+            list_of_msgs[i] =  {
+                    "measurement": self.measurement_name,
+                    "tags": {
+                        "event_type": event_type,
+                        "base_currency": symbol[:int(len(symbol)/2)],
+                        "quote_currency": symbol[int(len(symbol)/2):],
+                        "pair": symbol ,
+                        "interval": interval
+                    },
+                    "time": zulu.parse(raw_msg[0]/1000.0).isoformat(),#datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),#+'Z',
+                    "fields": {
+                        "open": float(raw_msg[1]),
+                        "close":float(raw_msg[4]),
+                        "high":float(raw_msg[2]),
+                        "low":float(raw_msg[3] ),
+                        "high-low":float(raw_msg[2])-float(raw_msg[2]),
+                        "close-open":float(raw_msg[4])-float(raw_msg[1]),
+                        "volume":float(raw_msg[5]), #Base asset volume
+                        "number_of_trades":int(raw_msg[8] ),
+                        "quote_volume":float(raw_msg[7] ), #Quote asset volume
+                        "active_buy_volume":float(raw_msg[9] ), #Taker buy base asset volume
+                        "active_buy_quote_volume":float(raw_msg[10]), #Taker buy quote asset volume
+                        "gain":-1,
+                        "lose":-1,
+                        "avg_gain":-1,
+                        "avg_lose":-1,
+                        "RSI":-1                   
+                    
+                    
+                    }
+                }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+           # list_of_msgs[i]= copy.deepcopy(msg)
         return list_of_msgs      
 
     def insert_offline_data(self,list_of_msgs,measurement,msg_type):   
-    
+        '''
         for msg in list_of_msgs:        
             self.insertMinuteTickValueIntoInfluxDB(msg,measurement,msg_type)
-            
+        '''
+        self.InfluxClient.write_points(points=list_of_msgs,retention_policy='coin_policy')
+        
     def insert_offline_tick_data(self,event_type,interval,units,num_of_units,msg_type,from_now=True,from_date=0,to_date=0):
         '''
         event_type = 'kline'
@@ -356,6 +414,7 @@ class binanceInfluxdb():
         
 symbol_1 = "IOTAUSDT"
 symbol_2=  "XRPUSDT"        
+symbol_3 = "BTCUSDT"
 
 f = open("/home/diego/Desktop/crypto/rl-crypto/Information/api_keys","r")
 keys = f.readlines()
@@ -364,24 +423,25 @@ api_secret = keys[1][:-1]
 
 
 ###        
-my_binance_influxdb_1 = binanceInfluxdb(symbol=symbol_1,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
-##my_binance_influxdb_1.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
-###           
-my_binance_influxdb_2 = binanceInfluxdb(symbol=symbol_2,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
-##my_binance_influxdb_2.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
-#
-##event_type,interval,units,num_of_units,msg_type
-#
-#
-my_binance_influxdb_2.websocket_start()  
+#my_binance_influxdb_1 = binanceInfluxdb(symbol=symbol_1,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
+###my_binance_influxdb_1.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
+####           
+#my_binance_influxdb_2 = binanceInfluxdb(symbol=symbol_2,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
+###my_binance_influxdb_2.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
+##
+###event_type,interval,units,num_of_units,msg_type
+##
+##
+#my_binance_influxdb_2.websocket_start()  
+#my_binance_influxdb_1.websocket_start() 
+
+
+
+
+
+my_binance_influxdb_1 = binanceInfluxdb(symbol=symbol_3,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
+my_binance_influxdb_1.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
 my_binance_influxdb_1.websocket_start() 
-
-
-
-
-
-
-
 
 
     
