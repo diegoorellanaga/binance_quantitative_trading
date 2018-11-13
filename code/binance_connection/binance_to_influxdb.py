@@ -55,7 +55,6 @@ class BinanceInfluxdb():
         units = 'minute'
         num_of_units = count+2 #Just in case I added 2 units more
         msg_type = 'raw'
-        #insert this amount of data to make sure I have the RAW DB updated
         self.insert_offline_tick_data(event_type,interval,units,num_of_units,msg_type)
     
     def insert_data_point_influxdb(self,msg,measurement,msg_type):
@@ -224,37 +223,3 @@ class BinanceInfluxdb():
         self.bm.close()
 
 
-        
-symbol_1 = "IOTAUSDT"
-symbol_2=  "XRPUSDT"        
-symbol_3 = "BTCUSDT"
-
-f = open("/home/diego/Desktop/crypto/rl-crypto/Information/api_keys","r")
-keys = f.readlines()
-api_key = keys[0][:-1]
-api_secret = keys[1][:-1]
-
-
-##        
-my_binance_influxdb_1 = BinanceInfluxdb(symbol=symbol_1,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
-##my_binance_influxdb_1.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
-###           
-my_binance_influxdb_2 = BinanceInfluxdb(symbol=symbol_2,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
-##my_binance_influxdb_2.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
-#
-##event_type,interval,units,num_of_units,msg_type
-#
-#
-my_binance_influxdb_2.websocket_start()  
-my_binance_influxdb_1.websocket_start() 
-
-
-
-
-
-#my_binance_influxdb_1 = BinanceInfluxdb(symbol=symbol_3,is_new_db=False,database='binance',api_key=api_key,api_secret=api_secret)
-#my_binance_influxdb_1.insert_offline_tick_data(event_type = 'kline',interval ='1m',units = 'month',num_of_units = 6,msg_type = 'raw') 
-#my_binance_influxdb_1.websocket_start() 
-
-
-    

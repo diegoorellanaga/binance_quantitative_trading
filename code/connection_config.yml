@@ -1,0 +1,13 @@
+API_keys: # Do not share this information
+    public: insert_binance_public_api_key
+    private: insert_binance_private_api_key
+connection_settings:
+    target_cryptos: # Add more crypto symbols if you want.
+        - IOTAUSDT
+        - XRPUSDT
+        - BTCUSDT
+    first_time: yes #If yes then we populate with data from the last 6 months.
+    resolution: 1m  #we get the data minute by minute. If first_time is yes
+    units: month    #we are going to insert data offline using months units. If first_time is yes
+    num_of_units: 6 # we want to insert data from now to 6 months ago. If first_time is yes
+  
