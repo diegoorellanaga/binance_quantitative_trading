@@ -18,9 +18,22 @@ app = dash.Dash()
 
 app.layout = html.Div([
     html.Hr(),
-    html.Label('Multi-Select Dropdown'),
+    html.Label('Select coin-pair to extract'),
     dcc.Dropdown(
-        id='dropdown-1',    
+        id='dropdown-coin',    
+        options=[
+            {'label': 'IOTA-USTD', 'value': 'IOTAUSDT'},
+            {'label': 'BITCOIN-USTD', 'value': 'BTCUSDT'},
+            {'label': 'RIPPLE-USTD', 'value': 'XRPUSDT'}
+        ],
+        value='IOTAUSTD',
+    ),    
+    
+    
+    
+    html.Label('Select data to extract'),
+    dcc.Dropdown(
+        id='dropdown-fields',    
         options=[
             {'label': 'close price', 'value': 'close'},
             {'label': 'volume', 'value': 'volume'},
@@ -52,9 +65,10 @@ data_test_1 = pd.DataFrame(data=np.zeros([200,2]),columns=['test_1','test_2'])
 @app.callback(
     Output('output-graph', 'children'),
     [Input('button-3', 'n_clicks'),
-     Input('dropdown-plot', 'value')
+     Input('dropdown-plot', 'value'),
+     Input('dropdown-coin', 'value')
      ])
-def plot_graph(n_clicks,value):
+def plot_graph(n_clicks,value,value_coin):
     global data_test_1
     if n_clicks > 0:
        
@@ -67,7 +81,7 @@ def plot_graph(n_clicks,value):
                                   {'x':data_test_1.values[:,-1],'y':data_test_1[value].values,'type':'line','name':'input_data'},                   
                                  ],
                                   'layout': {
-                                          'title': 'input_data'
+                                          'title': value_coin
                                           }
                                   
                               })
@@ -76,36 +90,39 @@ def plot_graph(n_clicks,value):
 @app.callback(
     Output('button-clicks-2', 'children'),
     [Input('button-data', 'n_clicks'),
-     Input('dropdown-1', 'value')   
+     Input('dropdown-fields', 'value'),
+     Input('dropdown-coin', 'value') 
      ])
-def load_data(n_clicks,value):
+def load_data(n_clicks,value,value_coin):
     global data_test_1
     if n_clicks > 0 :
         tf_influxdb_1 = InfluxdbDataExtraction(host='localhost', port=8086,database="binance")
-        data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = value, measurement ="minute_tick" )
+        data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = value_coin, unit = "1h",data_to_extract = value, measurement ="minute_tick" )
         data_test_1.dropna()
        # data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = ["close"], measurement ="minute_tick" )
 
     
-    return 'shape of data is:{}'.format(data_test_1.shape) + ",data columns names are: " + " | ".join(list(data_test_1.columns))    
+    return 'shape of data is: {}'.format(data_test_1.shape) + ", data columns names are: " + " | ".join(list(data_test_1.columns))    
     
     
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True,port=8051)
+    app.run_server(debug=True,port=8053)
     
     
-    
-    
-    
+'''    
+               {'label': 'IOTA-USTD', 'value': 'IOTAUSDT'},
+            {'label': 'BITCOIN-USTD', 'value': 'BTCUSDT'},
+            {'label': 'RIPPLE-USTD', 'value': 'XRPUSTD'} 
+'''    
     
 #    
 #import matplotlib.pyplot as plt    
 #    
-#    
+##    
 #tf_influxdb_1 = InfluxdbDataExtraction(host='localhost', port=8086,database="binance")
-#data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = ['close'], measurement ="minute_tick" )    
+#data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "XRPUSTD", unit = "1h",data_to_extract = ['close'], measurement ="minute_tick" )    
 #plt.plot(data_test_1[:,0])   
     
     
