@@ -26,3 +26,6 @@ The following picture is what you may see once you establish the connection.
 
 ![title](data/images/grafana_screenshot.png)
 
+The following picture is the Influxdb data extraction interface.
+
+![title](data/images/dash-example.png)
