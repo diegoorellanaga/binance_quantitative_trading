@@ -7,7 +7,7 @@ from binance.websockets import BinanceSocketManager
 
 class BinanceInfluxdb():
     
-    def __init__(self,symbol = "IOTAUSDT",is_new_db = False,database ='binance_test_5',measurement= 'minute_tick',host='localhost', port=8086,api_key = "api_key",api_secret = "private_api_key" ):    
+    def __init__(self,symbol = "IOTAUSDT",is_new_db = False,database ='binance',measurement= 'minute_tick',host='localhost', port=8086,api_key = "api_key",api_secret = "private_api_key" ):    
     
         self.database = database
         self.client = Client(api_key, api_secret)
@@ -155,7 +155,7 @@ class BinanceInfluxdb():
                         "close":float(raw_msg[4]),
                         "high":float(raw_msg[2]),
                         "low":float(raw_msg[3] ),
-                        "high-low":float(raw_msg[2])-float(raw_msg[2]),
+                        "high-low":float(raw_msg[2])-float(raw_msg[3]),
                         "close-open":float(raw_msg[4])-float(raw_msg[1]),
                         "volume":float(raw_msg[5]), #Base asset volume
                         "number_of_trades":int(raw_msg[8] ),
@@ -221,5 +221,9 @@ class BinanceInfluxdb():
         
     def websocket_close(self):        
         self.bm.close()
+
+
+
+
 
 
