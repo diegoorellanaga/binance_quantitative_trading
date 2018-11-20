@@ -6,6 +6,8 @@ import datetime
 import fix_yahoo_finance as fyf 
 from pandas_datareader import data as pdr
 from training.extract_data import InfluxdbDataExtraction
+from training.train_model import TrainModel
+
 import numpy as np
 import pandas as pd
 
@@ -15,10 +17,7 @@ fyf.pdr_override()
 app = dash.Dash()
 
 app.layout = html.Div([
-
-
     html.Hr(),
-
     html.Label('Multi-Select Dropdown'),
     dcc.Dropdown(
         id='dropdown-1',    
@@ -30,17 +29,10 @@ app.layout = html.Div([
         value=['close'],
         multi=True
     ),
-
-
-    html.H3(id='button-clicks-3'),
-
     html.Div(id='output'),
     html.Hr(),
-
     html.Button('Extract data',id='button-data'),
     html.H4(id='button-clicks-2'),
-
-
     dcc.Dropdown(
         id='dropdown-plot',
         options=[
@@ -50,14 +42,8 @@ app.layout = html.Div([
         ],
         value='close'
     ),
-
-
-
     html.Button('plot data',id='button-3'),    
-    html.Div(id='output-graph')
-    
-    
-    
+    html.Div(id='output-graph')  
 ])
 
 
@@ -101,16 +87,9 @@ def load_data(n_clicks,value):
        # data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = ["close"], measurement ="minute_tick" )
 
     
-    return 'shape of data is:{}'.format(data_test_1.shape) + ",data columns names are: " + " ".join(list(data_test_1.columns))    
+    return 'shape of data is:{}'.format(data_test_1.shape) + ",data columns names are: " + " | ".join(list(data_test_1.columns))    
     
-@app.callback(
-    Output('button-clicks-3', 'children'),
-    [Input('button-data', 'n_clicks')])
-def data_column_info(n_clicks,value):
-    global data_test_1
-
     
-    return "data columns names are: " + " ".join(list(data_test_1.columns))      
 
 
 if __name__ == '__main__':
