@@ -5,8 +5,9 @@ import dash_core_components as dcc
 import datetime
 import fix_yahoo_finance as fyf 
 from pandas_datareader import data as pdr
-from training.extract_data import tensorflow_influxdb
+from training.extract_data import InfluxdbDataExtraction
 import numpy as np
+import pandas as pd
 
 
 fyf.pdr_override()
@@ -14,27 +15,43 @@ fyf.pdr_override()
 app = dash.Dash()
 
 app.layout = html.Div([
-    html.Button('Click Me', id='button'),
-    html.H3(id='button-clicks'),
+
 
     html.Hr(),
 
-    html.Label('Input 1'),
-    dcc.Input(id='input-1'),
+    html.Label('Multi-Select Dropdown'),
+    dcc.Dropdown(
+        id='dropdown-1',    
+        options=[
+            {'label': 'close price', 'value': 'close'},
+            {'label': 'volume', 'value': 'volume'},
+            {'label': 'number of trades', 'value': 'number_of_trades'}
+        ],
+        value=['close'],
+        multi=True
+    ),
 
-    html.Label('Input 2'),
-    dcc.Input(id='input-2'),
 
-    html.Label('Slider 1'),
-    dcc.Slider(id='slider-1'),
-
-    html.Button('Click Me 2',id='button-2'),
+    html.H3(id='button-clicks-3'),
 
     html.Div(id='output'),
     html.Hr(),
 
     html.Button('Extract data',id='button-data'),
     html.H4(id='button-clicks-2'),
+
+
+    dcc.Dropdown(
+        id='dropdown-plot',
+        options=[
+            {'label': 'close price', 'value': 'close'},
+            {'label': 'volume', 'value': 'volume'},
+            {'label': 'number of trades', 'value': 'number_of_trades'}
+        ],
+        value='close'
+    ),
+
+
 
     html.Button('plot data',id='button-3'),    
     html.Div(id='output-graph')
@@ -44,12 +61,14 @@ app.layout = html.Div([
 ])
 
 
-data_test_1 = np.zeros([200,3])
+data_test_1 = pd.DataFrame(data=np.zeros([200,2]),columns=['test_1','test_2'])
 
 @app.callback(
     Output('output-graph', 'children'),
-    [Input('button-3', 'n_clicks')])
-def plot_graph(n_clicks):
+    [Input('button-3', 'n_clicks'),
+     Input('dropdown-plot', 'value')
+     ])
+def plot_graph(n_clicks,value):
     global data_test_1
     if n_clicks > 0:
        
@@ -59,7 +78,7 @@ def plot_graph(n_clicks):
                     id='example',
                     figure={
                           'data':[
-                                  {'x':list(range(data_test_1.shape[0])),'y':data_test_1[:,0],'type':'line','name':'input_data'},                   
+                                  {'x':data_test_1.values[:,-1],'y':data_test_1[value].values,'type':'line','name':'input_data'},                   
                                  ],
                                   'layout': {
                                           'title': 'input_data'
@@ -70,37 +89,44 @@ def plot_graph(n_clicks):
 
 @app.callback(
     Output('button-clicks-2', 'children'),
-    [Input('button-data', 'n_clicks')])
-def load_data(n_clicks):
+    [Input('button-data', 'n_clicks'),
+     Input('dropdown-1', 'value')   
+     ])
+def load_data(n_clicks,value):
     global data_test_1
     if n_clicks > 0 :
-        tf_influxdb_1 = tensorflow_influxdb(host='localhost', port=8086,database="binance", measurement="minute_tick")
-
-        data_test_1 =  tf_influxdb_1.all_at_once(coin_id="IOTAUSDT",points_set_size=1,time_sets_to_consider=["minutes"],point_size=1*1*3,total_points=0,only_value=True,unit = 1,data_to_extract="LAST(close),LAST(volume),LAST(number_of_trades)")
+        tf_influxdb_1 = InfluxdbDataExtraction(host='localhost', port=8086,database="binance")
+        data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = value, measurement ="minute_tick" )
+        data_test_1.dropna()
+       # data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = ["close"], measurement ="minute_tick" )
 
     
-    return 'shape of data is:{}'.format(data_test_1.shape)    
+    return 'shape of data is:{}'.format(data_test_1.shape) + ",data columns names are: " + " ".join(list(data_test_1.columns))    
     
-    
-
 @app.callback(
-    Output('button-clicks', 'children'),
-    [Input('button', 'n_clicks')])
-def clicks(n_clicks):
-    return 'Button has been clicked {} times'.format(n_clicks)
+    Output('button-clicks-3', 'children'),
+    [Input('button-data', 'n_clicks')])
+def data_column_info(n_clicks,value):
+    global data_test_1
 
-@app.callback(
-    Output('output', 'children'),
-    [Input('button-2', 'n_clicks')],
-    state=[State('input-1', 'value'),
-           State('input-2', 'value'),
-           State('slider-1', 'value')])
-def compute(n_clicks, input1, input2, slider1):
-    return 'A computation based off of {}, {}, and {}'.format(
-        input1, input2, slider1
-    )
+    
+    return "data columns names are: " + " ".join(list(data_test_1.columns))      
+
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True,port=8051)
+    
+    
+    
+    
+    
+    
+#    
+#import matplotlib.pyplot as plt    
+#    
+#    
+#tf_influxdb_1 = InfluxdbDataExtraction(host='localhost', port=8086,database="binance")
+#data_test_1 =  tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = ['close'], measurement ="minute_tick" )    
+#plt.plot(data_test_1[:,0])   
     
     
