@@ -6,7 +6,7 @@ import datetime
 import fix_yahoo_finance as fyf 
 from pandas_datareader import data as pdr
 from training.extract_data import tensorflow_influxdb
-
+import numpy as np
 
 
 fyf.pdr_override()
@@ -36,36 +36,33 @@ app.layout = html.Div([
     html.Button('Extract data',id='button-data'),
     html.H4(id='button-clicks-2'),
 
-    html.Button('Click Me 3',id='button-3'),    
+    html.Button('plot data',id='button-3'),    
     html.Div(id='output-graph')
     
     
     
 ])
 
+
+data_test_1 = np.zeros([200,3])
+
 @app.callback(
     Output('output-graph', 'children'),
     [Input('button-3', 'n_clicks')])
 def plot_graph(n_clicks):
+    global data_test_1
     if n_clicks > 0:
-        input_data = 'TSLA'
-        start = datetime.datetime(2015, 1, 1)
-        end = datetime.datetime.now()
-        try:
-            df = pdr.get_data_yahoo(input_data,start=start,end=end)
-            df.to_pickle('{0}.pkl'.format(input_data))
-        except:
-            df = pdr.read_pickle('tsla.pkl')          
+       
             
             
         return dcc.Graph(
                     id='example',
                     figure={
                           'data':[
-                                  {'x':df.index,'y':df.Close.values,'type':'line','name':input_data},                   
+                                  {'x':list(range(data_test_1.shape[0])),'y':data_test_1[:,0],'type':'line','name':'input_data'},                   
                                  ],
                                   'layout': {
-                                          'title': input_data
+                                          'title': 'input_data'
                                           }
                                   
                               })
@@ -75,7 +72,7 @@ def plot_graph(n_clicks):
     Output('button-clicks-2', 'children'),
     [Input('button-data', 'n_clicks')])
 def load_data(n_clicks):
-    
+    global data_test_1
     if n_clicks > 0 :
         tf_influxdb_1 = tensorflow_influxdb(host='localhost', port=8086,database="binance", measurement="minute_tick")
 
