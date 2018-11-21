@@ -17,12 +17,17 @@ from keras.layers import Dropout
 from keras.layers import Flatten
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
+from training.extract_data import InfluxdbDataExtraction
 
 class TrainModel():
-    def __init__(self,raw_data,name="train_1"):
+    def __init__(self,raw_data,name="train_1", dataFrame = False):
         
-        self.raw_data = raw_data
-        self.name=name
+        if dataFrame:
+            self.raw_data = raw_data.values
+            self.columns = raw_data.columns
+        else:        
+            self.raw_data = raw_data
+            self.name=name
         
     def series_to_supervised(self,data, n_in=1, n_out=1, dropnan=True):
         	n_vars = 1 if type(data) is list else data.shape[1]
@@ -164,6 +169,8 @@ class TrainModel():
 
         self.predict_present = predict_present
         if self.predict_present:
+            print(self.train_data[:, :self.n_obs].shape)
+            print(self.test_data[:, :self.n_obs].shape)            
             self.train_X, self.train_y = self.train_data[:, :self.n_obs], self.train_data[:, self.n_obs-self.num_features+self.position_feature::self.num_features] #we need to jump the number of features as they are intercalated
             self.test_X, self.test_y = self.test_data[:, :self.n_obs], self.test_data[:, self.n_obs-self.num_features+self.position_feature::self.num_features]
             self.train_X_LSTM = self.train_X.reshape((self.train_X.shape[0], self.past_units, self.num_features))
@@ -179,11 +186,12 @@ class TrainModel():
  
             print(self.train_X_LSTM.shape, self.train_y.shape, self.test_X_LSTM.shape, self.test_y.shape)
 
-    def train_model_regression_LSTM(self,hidden_neurons=50, epochs=50, batch_size=100):
+    def train_model_regression_LSTM(self,hidden_neurons=50, epochs=50, batch_size=100, dropout = False):
         
         self.model = Sequential()
         self.model.add(LSTM(hidden_neurons, input_shape=(self.train_X_LSTM.shape[1], self.train_X_LSTM.shape[2])))
-        self.model.add(Dropout(0.2))
+        if dropout:
+            self.model.add(Dropout(0.2))
         if self.predict_present:
             self.model.add(Dense(self.future_units+1))
         else:
@@ -261,31 +269,107 @@ class TrainModel():
         self.yhat_train = self.model.predict(self.train_X_LSTM)        
 
     def invert_scale_prediction(self,):
-        print(self.test_X[self.future_units:,-2].shape)
-        print(self.yhat_test[:-self.future_units,self.future_units-1].shape)
-        print()
-        self.original_scale_test_last = self.scaler.inverse_transform(np.column_stack((self.yhat_test[:-self.future_units,self.future_units-1],self.test_X[self.future_units:,-self.num_features+1],self.test_X[self.future_units:,-self.num_features+2])))
-        self.original_scale_train_last = self.scaler.inverse_transform(np.column_stack((self.yhat_train[:-self.future_units,self.future_units-1],self.train_X[self.future_units:,-self.num_features+1],self.train_X[self.future_units:,-self.num_features+2])))   
-        self.original_scale_test_first = self.scaler.inverse_transform(np.column_stack((self.yhat_test[:-self.future_units,0],self.test_X[self.future_units:,-self.num_features+1],self.test_X[self.future_units:,-self.num_features+2])))
-        self.original_scale_train_first = self.scaler.inverse_transform(np.column_stack((self.yhat_train[:-self.future_units,0],self.train_X[self.future_units:,-self.num_features+1],self.train_X[self.future_units:,-self.num_features+2])))   
+        if self.predict_present:
+            offset = 0
+        else: 
+            offset = 1
+            
+            
+        self.columns_stack_test = self.yhat_test[:-1,1-offset]
+        self.columns_stack_train = self.yhat_train[:-1,1-offset]         
+      
+        
+        for i in range(self.num_features-1):
+            
+            self.columns_stack_test = np.column_stack((self.columns_stack_test,self.test_X[1:,-self.num_features+i+1]))
+            self.columns_stack_train = np.column_stack((self.columns_stack_train,self.train_X[1:,-self.num_features+i+1]))            
+        if self.num_features < 2:
+            
+            self.columns_stack_test = np.expand_dims(self.columns_stack_test, axis=1)
+            self.columns_stack_train = np.expand_dims(self.columns_stack_train, axis=1)
+            
+            self.original_scale_test_last = self.scaler.inverse_transform(self.columns_stack_test)
+            self.original_scale_train_last = self.scaler.inverse_transform(self.columns_stack_train)         
+        else:
+            self.original_scale_test_last = self.scaler.inverse_transform(self.columns_stack_test)
+            self.original_scale_train_last = self.scaler.inverse_transform(self.columns_stack_train)  
 
     def plotPredictedOriginal(self):
 
-        pyplot.plot(self.train_X_LSTM[1:,-self.num_features])
-        pyplot.plot(self.yhat_train[:-1,0])
+        pyplot.plot(self.train_X_LSTM[1:,-1,0],'k')
+        pyplot.plot(self.yhat_train[:-1,0],'b')
         pyplot.show()
 
-
+        print(self.original_scale_test_last[:].shape)
         
-        pyplot.plot(self.original_scale_test_last[:,0])
-        pyplot.plot(self.raw_data[self.training_amount:,0])
+        pyplot.plot(self.original_scale_test_last[:,0],'b')
+        pyplot.plot(self.raw_data[self.training_amount:,0],'k')
         pyplot.show()  
-        pyplot.plot(self.original_scale_test_first[:,0])
-        pyplot.plot(self.raw_data[self.training_amount:,0])
-        pyplot.show()        
         
+        pyplot.plot(self.original_scale_train_last[:,0],'b')
+        pyplot.plot(self.raw_data[:self.training_amount,0],'k')
+        pyplot.show()  
 
+
+        
+    def drop_column(self,column_name):
+        
+        self.df_data=self.df_data.drop([column_name],axis=1)
+
+
+
+
+#tf_influxdb_1 = InfluxdbDataExtraction(host='localhost', port=8086,database="binance")
+##
 #
+#data_basic = tf_influxdb_1.extract_data_basic(coin_id = "BTCUSDT", unit = "1h",data_to_extract = ["close",'volume'], measurement ="minute_tick" )
+#
+#
+#
+#LSTM_1 = TrainModel(raw_data=data_basic,name = "test_1",dataFrame= True)
+#LSTM_1.create_data_frame(columns=LSTM_1.columns)
+#LSTM_1.drop_nan_rows()
+#LSTM_1
+##LSTM_1.diff_data()
+##LSTM_1.drop_nan_rows()
+#LSTM_1.drop_column('time')
+#LSTM_1.scale_data(tuple_limit = (0,1))
+#LSTM_1.shift_data(past_units = 14,future_units = 5,num_features = 2,position_feature = 0)
+#LSTM_1.split_data_train_test(0.8)
+#LSTM_1.split_data_x_y(predict_present = True)
+#LSTM_1.train_model_regression_LSTM(hidden_neurons=80,epochs=20,batch_size=72, dropout = True)
+#LSTM_1.save_model(path_model="",path_weigths="",model_id="14-5-1-drop02-present_prediction_80-50-72_3")
+##LSTM_1.load_model(path_model="",path_weigths="",model_id="drop_diff_4")
+#LSTM_1.get_predicted_data()
+#LSTM_1.invert_scale_prediction()
+#LSTM_1.plotPredictedOriginal()
+##pyplot.plot(LSTM_1.df_data.values[:,0])
+##LSTM_1.df_data.shape
+#
+##train_X_LSTM
+#plt.plot(LSTM_1.yhat_train[:,5])
+#plt.plot(LSTM_1.train_X_LSTM[:,-3,0])
+#plt.show()
+#
+#plt.plot(LSTM_1.yhat_train[0:100,5])
+#plt.plot(LSTM_1.yhat_train[5:105,0])
+#plt.show()
+#
+#
+#plt.plot(LSTM_1.yhat_train[5:105,5])
+#plt.plot(LSTM_1.yhat_train[5:105,0])
+#plt.show()
+#
+#index = np.random.randint(0,1000)
+#plt.plot(LSTM_1.yhat_train[index,:],'b')
+##plt.plot(LSTM_1.yhat_train[index:5+index,0],'k')
+#plt.show()
+#LSTM_1.yhat_train[index,:]
+#
+#
+
+
+
 ##size of training set
 #n_train_hours = 365 * 24
 ##3 hours in the past
@@ -320,10 +404,10 @@ class TrainModel():
 #LSTM_1.plotPredictedOriginal()
 ###pyplot.plot(LSTM_1.df_data.values[:,0])
 ###LSTM_1.df_data.shape
-#
-#
-#
-#
+
+
+
+
 
 #-------------------------------------------------------
 
