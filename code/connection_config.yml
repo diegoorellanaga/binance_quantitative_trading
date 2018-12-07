@@ -1,6 +1,6 @@
 API_keys: # Do not share this information
-    public: insert_binance_public_api_key
-    private: insert_binance_private_api_key
+    public: insert_public_key
+    private: insert_private_key
 connection_settings:
     target_cryptos: # Add more crypto symbols if you want.
         - IOTAUSDT

@@ -29,3 +29,11 @@ The following picture is what you may see once you establish the connection.
 The following picture is the Influxdb data extraction interface.
 
 ![title](data/images/dash-example.png)
+
+
+### Steps
+
+ - run Influxdb and Grafana -> go to docker folder where the docker-compose.yml file is and type: docker-compose up -d
+ - install python-binance: pip install python-binance
+ - install python-influxdb: pip install influxdb
+ - install zulu: pip install zulu
