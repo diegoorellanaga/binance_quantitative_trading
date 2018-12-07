@@ -16,6 +16,14 @@
 
 - [x] Binance-influxdb connection
 - [ ] Calculate and update all Binance indicators
+	- We are going to start with 3 following the following youtube video suggestion: https://www.youtube.com/watch?v=fsNQr3poE3g&feature=youtu.be
+	- MACD, RSI Stochastics and CCI 
+        - MACD:
+		- slow: 30 / fast: 15 / MACD length: 9 /average type: exponential
+	- CCI
+		- length 31
+	- RSI
+		- 14 30 70
 - [ ] Upload files related to the machine learning tests on binance data
 - [ ] Upload files related to data extraction and formating from influxdb
 - [ ] Make a GUI
