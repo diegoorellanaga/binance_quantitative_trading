@@ -16,14 +16,14 @@
 
 - [x] Binance-influxdb connection
 - [ ] Calculate and update all Binance indicators
-	- We are going to start with 3 following the following youtube video suggestion: https://www.youtube.com/watch?v=fsNQr3poE3g&feature=youtu.be
+	- We are going to start with 3 following youtube video suggestion: https://www.youtube.com/watch?v=fsNQr3poE3g&feature=youtu.be
 	- MACD, RSI Stochastics and CCI 
         - MACD:
 		- slow: 30 / fast: 15 / MACD length: 9 /average type: exponential
 	- CCI
 		- length 31
 	- RSI
-		- 14 30 70
+		- 14/30/70
 - [ ] Upload files related to the machine learning tests on binance data
 - [ ] Upload files related to data extraction and formating from influxdb
 - [ ] Make a GUI
@@ -45,3 +45,9 @@ The following picture is the Influxdb data extraction interface.
  - install python-binance: pip install python-binance
  - install python-influxdb: pip install influxdb
  - install zulu: pip install zulu
+
+ - The following configuration works for the influxdb-grafana connection:
+
+![title](data/images/grafana_influxdb.png)
+
+Where the password "(*****)" is "changeme"
